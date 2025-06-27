@@ -1,4 +1,3 @@
-
 # 📚 Padrões de Código e Boas Práticas - Chat Simulator (Flutter + Firebase)
 
 Este documento define os padrões de código e boas práticas a serem seguidos durante o desenvolvimento do aplicativo **Chat Simulator**.
@@ -57,6 +56,14 @@ lib/
 - Nunca exponha dados sensíveis ou lógica crítica no cliente.
 - Sempre associe dados do Firestore a `uid` do usuário.
 - Trate exceções como falhas de login, conexões ou permissões.
+
+### Preferência por Emojis
+
+- Sempre que possível, utilize **emojis** em botões, menus e ações visuais no lugar de ícones tradicionais.
+- Emojis tornam a interface mais amigável, divertida e consistente com o estilo do app.
+- Exemplos:
+  - Use ✏️ para editar, 🗑️ para excluir, ➕ para adicionar, 📊 para ordenar, etc.
+- Só utilize ícones tradicionais quando não houver emoji adequado ou quando for necessário para acessibilidade.
 
 ---
 

@@ -227,4 +227,40 @@ class ChatService {
       return 0;
     }
   }
+
+  /// Atualiza o texto de uma mensagem específica
+  Future<void> updateMessage(String conversationId, String messageId, String newText) async {
+    try {
+      if (_isAuthenticatedUser) {
+        final userId = _authService.currentUserId;
+        await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection('conversations')
+            .doc(conversationId)
+            .collection('messages')
+            .doc(messageId)
+            .update({'text': newText});
+      } else {
+        final messages = _mockMessages[conversationId];
+        if (messages != null) {
+          final idx = messages.indexWhere((m) => m.id == messageId);
+          if (idx != -1) {
+            messages[idx] = Message(
+              id: messages[idx].id,
+              conversationId: messages[idx].conversationId,
+              text: newText,
+              userId: messages[idx].userId,
+              userName: messages[idx].userName,
+              timestamp: messages[idx].timestamp,
+              isFromUser: messages[idx].isFromUser,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      print('Erro ao atualizar mensagem: $e');
+      rethrow;
+    }
+  }
 }

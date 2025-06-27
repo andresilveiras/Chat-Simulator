@@ -170,6 +170,129 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  /// Edita uma mensagem específica
+  Future<void> _editMessage(Message message) async {
+    final controller = TextEditingController(text: message.text);
+    final newText = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar mensagem'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Digite o novo texto'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+    if (newText != null && newText.isNotEmpty && newText != message.text) {
+      try {
+        // Atualizar mensagem (apenas texto)
+        await _chatService.updateMessage(widget.conversation.id, message.id, newText);
+        setState(() {
+          final idx = _messages.indexWhere((m) => m.id == message.id);
+          if (idx != -1) {
+            _messages[idx] = Message(
+              id: message.id,
+              conversationId: message.conversationId,
+              text: newText,
+              userId: message.userId,
+              userName: message.userName,
+              timestamp: message.timestamp,
+              isFromUser: message.isFromUser,
+            );
+          }
+        });
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao editar mensagem: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  /// Exclui uma mensagem específica
+  Future<void> _deleteMessage(Message message) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir mensagem'),
+        content: const Text('Tem certeza que deseja excluir esta mensagem?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      try {
+        await _chatService.deleteMessage(widget.conversation.id, message.id);
+        setState(() {
+          _messages.removeWhere((m) => m.id == message.id);
+        });
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao excluir mensagem: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  /// Mostra opções ao pressionar mensagem
+  void _showMessageOptions(Message message) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Text('✏️', style: TextStyle(fontSize: 22)),
+              title: const Text('Editar'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _editMessage(message);
+              },
+            ),
+            ListTile(
+              leading: const Text('🗑️', style: TextStyle(fontSize: 22)),
+              title: const Text('Excluir'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _deleteMessage(message);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -245,6 +368,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             message: message,
                             isFromCurrentUser: message.isFromUser,
                             otherSideName: _otherSideName,
+                            onLongPress: () => _showMessageOptions(message),
                           );
                         },
                       ),

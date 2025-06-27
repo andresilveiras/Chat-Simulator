@@ -32,6 +32,7 @@ Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois
 - Mensagens organizadas cronologicamente
 - Limpeza de conversas
 - Edição do nome do outro lado dentro do chat
+- **Pressionar e segurar uma mensagem para editar (✏️) ou excluir (🗑️) usando menu com emojis**
 
 ### ✅ **Armazenamento na Nuvem**
 - Salvamento automático de mensagens no Firestore
@@ -70,6 +71,12 @@ Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois
 - Toque em uma conversa para abrir
 - Use o ícone 🗑️ para deletar conversas
 - Use o botão de limpar para remover todas as mensagens
+
+### 7. **Editar ou Excluir Mensagem**
+- **Pressione e segure** uma mensagem na tela do chat
+- Um menu com emojis será exibido:
+  - ✏️ Editar: permite alterar o texto da mensagem
+  - 🗑️ Excluir: remove apenas aquela mensagem
 
 ## 🏗️ Estrutura do Projeto
 
@@ -155,6 +162,7 @@ Para habilitar o salvamento na nuvem:
 - [x] Edição de título direto na lista
 - [x] Classificação/ordenação de conversas
 - [x] Indicador visual de ordenação
+- [x] Editar/excluir mensagem individual (menu com emojis)
 - [ ] Upload de imagens para conversas
 - [ ] Exportação de conversas
 - [ ] Temas personalizados
