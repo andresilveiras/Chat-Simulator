@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Configurações padrão do Firebase para desenvolvimento
+/// Configurações do Firebase para o projeto Chat Simulator
 /// 
 /// ⚠️ IMPORTANTE: Para produção, gere as configurações reais usando:
 /// flutterfire configure
@@ -32,49 +32,54 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // Configurações para desenvolvimento - substitua pelos valores reais
+  // Configurações para Web
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-api-key',
-    appId: 'your-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project-id.firebaseapp.com',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
+    appId: '1:435765898359:web:22e48cf5901c3e114aea72',
+    messagingSenderId: '435765898359',
+    projectId: 'chat-simulator-app',
+    authDomain: 'chat-simulator-app.firebaseapp.com',
+    storageBucket: 'chat-simulator-app.firebasestorage.app',
   );
 
+  // Configurações para Android
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'your-api-key',
-    appId: 'your-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
+    appId: '1:435765898359:android:22e48cf5901c3e114aea72',
+    messagingSenderId: '435765898359',
+    projectId: 'chat-simulator-app',
+    storageBucket: 'chat-simulator-app.firebasestorage.app',
   );
 
+  // Configurações para iOS
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'your-api-key',
-    appId: 'your-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
-    iosClientId: 'your-ios-client-id',
+    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
+    appId: '1:435765898359:ios:22e48cf5901c3e114aea72',
+    messagingSenderId: '435765898359',
+    projectId: 'chat-simulator-app',
+    storageBucket: 'chat-simulator-app.firebasestorage.app',
+    iosClientId: '435765898359-44kv88kh3is0nqi8gohmhgmh42t9fi7p.apps.googleusercontent.com',
     iosBundleId: 'com.andresilveiras.chatsimulator',
   );
 
+  // Configurações para macOS
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'your-api-key',
-    appId: 'your-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
-    iosClientId: 'your-ios-client-id',
+    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
+    appId: '1:435765898359:ios:22e48cf5901c3e114aea72',
+    messagingSenderId: '435765898359',
+    projectId: 'chat-simulator-app',
+    storageBucket: 'chat-simulator-app.firebasestorage.app',
+    iosClientId: '435765898359-44kv88kh3is0nqi8gohmhgmh42t9fi7p.apps.googleusercontent.com',
     iosBundleId: 'com.andresilveiras.chatsimulator',
   );
 
+  // Configurações para Windows
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'your-api-key',
-    appId: 'your-app-id',
-    messagingSenderId: 'your-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
+    appId: '1:435765898359:web:22e48cf5901c3e114aea72',
+    messagingSenderId: '435765898359',
+    projectId: 'chat-simulator-app',
+    authDomain: 'chat-simulator-app.firebaseapp.com',
+    storageBucket: 'chat-simulator-app.firebasestorage.app',
   );
 }
