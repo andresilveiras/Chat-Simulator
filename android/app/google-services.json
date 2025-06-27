@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "435765898359",
+    "project_id": "chat-simulator-app",
+    "storage_bucket": "chat-simulator-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:435765898359:android:22e48cf5901c3e114aea72",
+        "android_client_info": {
+          "package_name": "com.andresilveiras.chatsimulator"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,7 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.andresilveiras.chatsimulator">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="chat_simulator"
+        android:label="@string/app_name"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
