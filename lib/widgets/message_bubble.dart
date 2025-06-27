@@ -1,0 +1,1 @@
+// Widget to display a single message

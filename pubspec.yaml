@@ -1,0 +1,10 @@
+name: chat_simulator
+version: 1.0.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.0.0
+  firebase_auth: ^4.0.0
+  cloud_firestore: ^4.0.0
+  google_sign_in: ^6.1.0
