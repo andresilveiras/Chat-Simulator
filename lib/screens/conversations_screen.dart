@@ -7,6 +7,18 @@ import '../widgets/conversation_tile.dart';
 import '../widgets/custom_icon.dart';
 import '../screens/login_screen.dart';
 
+/// Enum para tipos de ordenação das conversas
+enum SortType {
+  recent('Mais Recentes'),
+  alphabetical('Ordem Alfabética'),
+  oldest('Mais Antigas'),
+  mostMessages('Mais Mensagens'),
+  leastMessages('Menos Mensagens');
+
+  const SortType(this.label);
+  final String label;
+}
+
 /// Tela principal com lista de conversas
 /// Segue as convenções de nomenclatura e boas práticas
 class ConversationsScreen extends StatefulWidget {
@@ -20,7 +32,9 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
   final AuthService _authService = AuthService();
   final ConversationService _conversationService = ConversationService();
   final List<Conversation> _conversations = [];
+  final List<Conversation> _allConversations = [];
   bool _isLoading = true;
+  SortType _currentSortType = SortType.recent;
 
   @override
   void initState() {
@@ -33,8 +47,9 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     try {
       final conversations = await _conversationService.getConversations();
       setState(() {
-        _conversations.clear();
-        _conversations.addAll(conversations);
+        _allConversations.clear();
+        _allConversations.addAll(conversations);
+        _applySorting();
         _isLoading = false;
       });
     } catch (e) {
@@ -50,6 +65,42 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
         );
       }
     }
+  }
+
+  /// Aplica a ordenação atual às conversas
+  void _applySorting() {
+    final sortedConversations = List<Conversation>.from(_allConversations);
+    
+    switch (_currentSortType) {
+      case SortType.recent:
+        sortedConversations.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
+        break;
+      case SortType.alphabetical:
+        sortedConversations.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+        break;
+      case SortType.oldest:
+        sortedConversations.sort((a, b) => a.lastMessageAt.compareTo(b.lastMessageAt));
+        break;
+      case SortType.mostMessages:
+        sortedConversations.sort((a, b) => b.messageCount.compareTo(a.messageCount));
+        break;
+      case SortType.leastMessages:
+        sortedConversations.sort((a, b) => a.messageCount.compareTo(b.messageCount));
+        break;
+    }
+    
+    setState(() {
+      _conversations.clear();
+      _conversations.addAll(sortedConversations);
+    });
+  }
+
+  /// Altera o tipo de ordenação
+  void _changeSortType(SortType newSortType) {
+    setState(() {
+      _currentSortType = newSortType;
+    });
+    _applySorting();
   }
 
   /// Cria uma nova conversa
@@ -85,15 +136,18 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       try {
         final conversation = await _conversationService.createConversation(result);
         setState(() {
-          _conversations.add(conversation);
+          _allConversations.add(conversation);
+          _applySorting();
         });
         
         if (mounted) {
-          Navigator.of(context).push(
+          await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => ChatScreen(conversation: conversation),
             ),
           );
+          // Recarrega conversas quando voltar do chat
+          _loadConversations();
         }
       } catch (e) {
         if (mounted) {
@@ -136,13 +190,77 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       try {
         await _conversationService.deleteConversation(conversation.id);
         setState(() {
-          _conversations.remove(conversation);
+          _allConversations.remove(conversation);
+          _applySorting();
         });
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Erro ao deletar conversa: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  /// Edita o título de uma conversa
+  Future<void> _editConversationTitle(Conversation conversation) async {
+    final TextEditingController titleController = TextEditingController(text: conversation.title);
+    
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Título'),
+        content: TextField(
+          controller: titleController,
+          decoration: const InputDecoration(
+            labelText: 'Título da conversa',
+            hintText: 'Digite o novo título da conversa',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(titleController.text),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.trim().isNotEmpty && result.trim() != conversation.title) {
+      try {
+        final updatedConversation = conversation.copyWith(title: result.trim());
+        await _conversationService.updateConversation(updatedConversation);
+        
+        setState(() {
+          final index = _allConversations.indexWhere((c) => c.id == conversation.id);
+          if (index != -1) {
+            _allConversations[index] = updatedConversation;
+          }
+          _applySorting();
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Título atualizado com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao atualizar título: $e'),
               backgroundColor: Colors.red,
             ),
           );
@@ -179,6 +297,38 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       appBar: AppBar(
         title: const Text('Chat Simulator'),
         actions: [
+          // Botão de ordenação
+          PopupMenuButton<SortType>(
+            icon: const CustomIcon(
+              emoji: '📊',
+              size: 24,
+            ),
+            tooltip: 'Ordenar conversas',
+            onSelected: _changeSortType,
+            itemBuilder: (context) => SortType.values.map((sortType) {
+              final bool isSelected = sortType == _currentSortType;
+              return PopupMenuItem<SortType>(
+                value: sortType,
+                child: Container(
+                  width: double.infinity,
+                  decoration: isSelected
+                      ? BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(6),
+                        )
+                      : null,
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Text(
+                    sortType.label,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
           IconButton(
             onPressed: _signOut,
             icon: const CustomIcon(
@@ -222,23 +372,59 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                     ],
                   ),
                 )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: _conversations.length,
-                  itemBuilder: (context, index) {
-                    final conversation = _conversations[index];
-                    return ConversationTile(
-                      conversation: conversation,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => ChatScreen(conversation: conversation),
+              : Column(
+                  children: [
+                    // Indicador de ordenação
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      color: Theme.of(context).brightness == Brightness.dark 
+                          ? Colors.grey.shade800 
+                          : Colors.grey.shade100,
+                      child: Row(
+                        children: [
+                          const CustomIcon(
+                            emoji: '📊',
+                            size: 16,
                           ),
-                        );
-                      },
-                      onDelete: () => _deleteConversation(conversation),
-                    );
-                  },
+                          const SizedBox(width: 8),
+                          Text(
+                            'Ordenado por: ${_currentSortType.label}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.grey.shade400 
+                                  : Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: _conversations.length,
+                        itemBuilder: (context, index) {
+                          final conversation = _conversations[index];
+                          return ConversationTile(
+                            conversation: conversation,
+                            onTap: () async {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ChatScreen(conversation: conversation),
+                                ),
+                              );
+                              // Recarrega conversas quando voltar do chat
+                              _loadConversations();
+                            },
+                            onEdit: () => _editConversationTitle(conversation),
+                            onDelete: () => _deleteConversation(conversation),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createNewConversation,

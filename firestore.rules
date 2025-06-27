@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Regras para usuários autenticados
+    match /users/{userId} {
+      // Usuário só pode acessar seus próprios dados
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Regras para conversas do usuário
+      match /conversations/{conversationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Regras para mensagens da conversa
+        match /messages/{messageId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+    }
+    
+    // Negar acesso a todos os outros documentos
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 
