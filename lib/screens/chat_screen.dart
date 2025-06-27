@@ -184,7 +184,7 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
             onPressed: _editOtherSideName,
             icon: const CustomIcon(
-              emoji: '✏️',
+              emoji: '📝',
               size: 22,
             ),
             tooltip: 'Editar nome do outro lado',
