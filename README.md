@@ -1,12 +1,14 @@
 # Chat Simulator
 
-Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois lados controlados manualmente pelo usuário. O app usa Firebase para autenticação com Google e armazenamento em nuvem (Firestore), garantindo que suas conversas sejam salvas e sincronizadas entre dispositivos.
+Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois lados controlados manualmente pelo usuário. O app usa Firebase para autenticação e armazenamento em nuvem (Firestore), garantindo que suas conversas sejam salvas e sincronizadas entre dispositivos.
 
 ## 🎯 Funcionalidades
 
 ### ✅ **Autenticação e Segurança**
-- Login com conta Google (preparado para implementação)
-- Autenticação anônima para desenvolvimento
+- **Login com Email e Senha** - Criação de conta e login tradicional
+- **Login com Google** - Autenticação rápida com conta Google
+- **Login Anônimo** - Para uso rápido sem criar conta
+- **Recuperação de Senha** - Envio de email para redefinir senha
 - Conversas privadas por usuário
 
 ### ✅ **Gerenciamento de Conversas**
@@ -29,8 +31,10 @@ Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois
 ## 📱 Como Usar
 
 ### 1. **Login**
-- Toque em "Entrar Anonimamente" para começar
-- (Futuro: Login com Google para sincronização)
+- **Email/Senha**: Digite seu email e senha para criar conta ou fazer login
+- **Google**: Toque em "Google" para login rápido
+- **Anônimo**: Toque em "Anônimo" para uso sem conta
+- **Recuperar Senha**: Use "Esqueci a senha" para receber email de recuperação
 
 ### 2. **Criar Conversa**
 - Toque no botão "+" para criar nova conversa
@@ -61,11 +65,11 @@ lib/
 │   ├── conversation.dart       # Modelo de conversas
 │   └── message.dart            # Modelo de mensagens
 ├── screens/
-│   ├── login_screen.dart       # Tela de login
+│   ├── login_screen.dart       # Tela de login (email/senha, Google, anônimo)
 │   ├── conversations_screen.dart # Menu de conversas
 │   └── chat_screen.dart        # Tela de conversa
 ├── services/
-│   ├── auth_service.dart       # Autenticação
+│   ├── auth_service.dart       # Autenticação Firebase (email/senha, Google, anônimo)
 │   ├── chat_service.dart       # Lógica de mensagens
 │   └── conversation_service.dart # Gerenciamento de conversas
 └── widgets/
@@ -98,7 +102,7 @@ lib/
    flutter run
    ```
 
-## 🔥 Configuração do Firebase (Opcional)
+## 🔥 Configuração do Firebase
 
 Para habilitar o salvamento na nuvem:
 
@@ -108,7 +112,7 @@ Para habilitar o salvamento na nuvem:
 
 2. **Configure autenticação**
    - Vá em Authentication → Sign-in method
-   - Habilite Google Sign-in
+   - Habilite **Email/Password** e **Google Sign-in**
 
 3. **Configure Firestore**
    - Vá em Firestore Database
@@ -125,7 +129,10 @@ Para habilitar o salvamento na nuvem:
 
 ## 📋 Roadmap
 
-- [ ] Login com Google
+- [x] Login com Email/Senha
+- [x] Login com Google
+- [x] Login Anônimo
+- [x] Recuperação de Senha
 - [ ] Upload de imagens para conversas
 - [ ] Exportação de conversas
 - [ ] Temas personalizados
