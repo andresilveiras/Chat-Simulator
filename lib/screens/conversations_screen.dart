@@ -5,6 +5,7 @@ import '../services/conversation_service.dart';
 import 'chat_screen.dart';
 import '../widgets/conversation_tile.dart';
 import '../widgets/custom_icon.dart';
+import '../screens/login_screen.dart';
 
 /// Tela principal com lista de conversas
 /// Segue as convenções de nomenclatura e boas práticas
@@ -63,7 +64,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
           controller: titleController,
           decoration: const InputDecoration(
             labelText: 'Título da conversa',
-            hintText: 'Ex: Conversa com João',
+            hintText: 'Este será o nome visível na lista de conversas.',
           ),
           autofocus: true,
         ),
@@ -155,7 +156,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     try {
       await _authService.signOut();
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
       }
     } catch (e) {
       if (mounted) {
