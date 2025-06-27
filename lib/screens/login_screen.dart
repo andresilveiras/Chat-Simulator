@@ -49,6 +49,26 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      final userCredential = await _authService.signInWithGoogle();
+      if (userCredential != null && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const ConversationsScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro no login Google: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 32),
             const Text(
-              'Bem-vindo ao Chat Simulator',
+              'Oi! Este é o Chat Simulator',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -74,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Simule conversas controladas por você',
+              'Simule conversas totalmente controladas por você. 😉',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
@@ -96,6 +116,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   horizontal: 32,
                   vertical: 16,
                 ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _isLoading ? null : _signInWithGoogle,
+              icon: const CustomIcon(emoji: '🇬', size: 24),
+              label: const Text('Entrar com Google'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
               ),
             ),
           ],

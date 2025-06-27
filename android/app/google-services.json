@@ -12,7 +12,20 @@
           "package_name": "com.andresilveiras.chatsimulator"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "435765898359-2vj5e76o4effm2ca6tocr7h2pqfe5gjd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.andresilveiras.chatsimulator",
+            "certificate_hash": "ba22494d9d1382c08fbbe202304c20db7ed82af0"
+          }
+        },
+        {
+          "client_id": "435765898359-44kv88kh3is0nqi8gohmhgmh42t9fi7p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "435765898359-44kv88kh3is0nqi8gohmhgmh42t9fi7p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

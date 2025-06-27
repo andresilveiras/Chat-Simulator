@@ -1,5 +1,9 @@
 /// Serviço responsável pela autenticação (versão mock para desenvolvimento)
 /// Segue as convenções de nomenclatura e boas práticas
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in_platform_interface/google_sign_in_platform_interface.dart';
+
 class AuthService {
   bool _isAuthenticated = false;
   String _userId = '';
@@ -39,5 +43,19 @@ class AuthService {
     } catch (e) {
       print('Erro no logout: $e');
     }
+  }
+
+  Future<UserCredential?> signInWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if (googleUser == null) return null; // Usuário cancelou
+
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
+    );
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 }
