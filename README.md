@@ -14,14 +14,24 @@ Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois
 ### ✅ **Gerenciamento de Conversas**
 - Tela de menu com lista de conversas (estilo WhatsApp/Telegram)
 - Criação de novas conversas com título personalizado
+- **Edição de título direto na lista de conversas**
 - Exclusão de conversas
 - Contador de mensagens por conversa
+- **Classificação/ordenação de conversas** por:
+  - Mais recentes
+  - Ordem alfabética
+  - Mais antigas
+  - Mais mensagens
+  - Menos mensagens
+- **Dropdown de ordenação** com destaque visual para a opção selecionada
+- **Indicador visual** mostrando o critério de ordenação atual
 
 ### ✅ **Simulação de Conversas**
 - **Dois botões de envio**: um para cada lado da conversa
 - Interface intuitiva com botões "Você" e "Outro Lado"
 - Mensagens organizadas cronologicamente
 - Limpeza de conversas
+- Edição do nome do outro lado dentro do chat
 
 ### ✅ **Armazenamento na Nuvem**
 - Salvamento automático de mensagens no Firestore
@@ -41,15 +51,24 @@ Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois
 - Digite o título da conversa (ex: "Conversa com João")
 - Toque em "Criar"
 
-### 3. **Simular Conversa**
+### 3. **Classificar/Ordenar Conversas**
+- Toque no ícone 📊 no topo da tela de conversas
+- Escolha o critério de ordenação desejado (mais recentes, alfabética, etc.)
+- O critério selecionado fica destacado e aparece um indicador acima da lista
+
+### 4. **Editar Título da Conversa**
+- Toque no ícone ✏️ ao lado do título da conversa na lista
+- Digite o novo título e salve
+
+### 5. **Simular Conversa**
 - Use o campo de texto para digitar mensagens
 - **Botão "Outro Lado"**: simula mensagem do outro participante
 - **Botão "Você"**: simula sua mensagem
 - As mensagens aparecem em lados opostos da tela
 
-### 4. **Gerenciar Conversas**
+### 6. **Gerenciar Conversas**
 - Toque em uma conversa para abrir
-- Use o menu (3 pontos) para deletar conversas
+- Use o ícone 🗑️ para deletar conversas
 - Use o botão de limpar para remover todas as mensagens
 
 ## 🏗️ Estrutura do Projeto
@@ -133,6 +152,9 @@ Para habilitar o salvamento na nuvem:
 - [x] Login com Google
 - [x] Login Anônimo
 - [x] Recuperação de Senha
+- [x] Edição de título direto na lista
+- [x] Classificação/ordenação de conversas
+- [x] Indicador visual de ordenação
 - [ ] Upload de imagens para conversas
 - [ ] Exportação de conversas
 - [ ] Temas personalizados
