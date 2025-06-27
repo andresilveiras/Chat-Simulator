@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'conversations_screen.dart';
+import '../widgets/custom_icon.dart';
 
 /// Tela de login do aplicativo
 /// Permite autenticação anônima e navegação para o menu de conversas
@@ -58,8 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.chat_bubble_outline,
+            const CustomIcon(
+              emoji: '💬',
               size: 100,
               color: Colors.blue,
             ),
@@ -88,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.login),
+                  : const CustomIcon(emoji: '👤', size: 24),
               label: Text(_isLoading ? 'Entrando...' : 'Entrar Anonimamente'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(

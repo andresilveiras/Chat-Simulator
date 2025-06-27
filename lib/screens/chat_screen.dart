@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/conversation.dart';
-import '../services/auth_service.dart';
 import '../services/chat_service.dart';
 import '../services/conversation_service.dart';
 import '../models/message.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/dual_message_input.dart';
+import '../widgets/custom_icon.dart';
 
 /// Tela de conversa com dois lados controlados manualmente
 /// Segue as convenções de nomenclatura e boas práticas
@@ -22,15 +22,16 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final AuthService _authService = AuthService();
   final ChatService _chatService = ChatService();
   final ConversationService _conversationService = ConversationService();
   final List<Message> _messages = [];
   bool _isLoading = true;
+  String? _otherSideName;
 
   @override
   void initState() {
     super.initState();
+    _otherSideName = widget.conversation.otherSideName ?? 'Outro Lado';
     _loadMessages();
   }
 
@@ -58,12 +59,15 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  /// Envia mensagem do lado direito (usuário)
-  Future<void> _sendUserMessage(String text) async {
+  /// Envia mensagem (unificado para ambos os lados)
+  Future<void> _sendMessage(String text, bool isFromUser) async {
     if (text.trim().isEmpty) return;
 
     try {
-      final message = await _chatService.sendUserMessage(widget.conversation.id, text);
+      final message = isFromUser
+          ? await _chatService.sendUserMessage(widget.conversation.id, text)
+          : await _chatService.sendOtherSideMessage(widget.conversation.id, text);
+      
       setState(() {
         _messages.add(message);
       });
@@ -82,28 +86,14 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  /// Envia mensagem do lado direito (usuário)
+  Future<void> _sendUserMessage(String text) async {
+    await _sendMessage(text, true);
+  }
+
   /// Envia mensagem do lado esquerdo (outro lado)
   Future<void> _sendOtherSideMessage(String text) async {
-    if (text.trim().isEmpty) return;
-
-    try {
-      final message = await _chatService.sendOtherSideMessage(widget.conversation.id, text);
-      setState(() {
-        _messages.add(message);
-      });
-      
-      // Atualiza a conversa com a nova mensagem
-      await _conversationService.updateLastMessage(widget.conversation.id, message.timestamp);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao enviar mensagem: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    await _sendMessage(text, false);
   }
 
   /// Limpa todas as mensagens da conversa
@@ -149,15 +139,62 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _editOtherSideName() async {
+    final controller = TextEditingController(text: _otherSideName);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar nome do outro lado'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Nome do outro lado'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+    if (newName != null && newName.isNotEmpty && newName != _otherSideName) {
+      setState(() {
+        _otherSideName = newName;
+      });
+      await _conversationService.updateOtherSideName(widget.conversation.id, newName);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const CustomIcon(emoji: '↩', size: 24),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Voltar',
+        ),
         title: Text(widget.conversation.title),
         actions: [
           IconButton(
+            onPressed: _editOtherSideName,
+            icon: const CustomIcon(
+              emoji: '✏️',
+              size: 22,
+            ),
+            tooltip: 'Editar nome do outro lado',
+          ),
+          IconButton(
             onPressed: _clearConversation,
-            icon: const Icon(Icons.clear_all),
+            icon: const CustomIcon(
+              emoji: '🧹',
+              size: 24,
+            ),
             tooltip: 'Limpar conversa',
           ),
         ],
@@ -174,10 +211,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.chat_bubble_outline,
+                            const CustomIcon(
+                              emoji: '💬',
                               size: 80,
-                              color: Colors.grey,
                             ),
                             const SizedBox(height: 16),
                             const Text(
@@ -205,13 +241,17 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final message = _messages[_messages.length - 1 - index];
-                          return MessageBubble(message: message);
+                          return MessageBubble(
+                            message: message,
+                            isFromCurrentUser: message.isFromUser,
+                            otherSideName: _otherSideName,
+                          );
                         },
                       ),
           ),
           DualMessageInput(
-            onSendUserMessage: _sendUserMessage,
-            onSendOtherSideMessage: _sendOtherSideMessage,
+            onSendMessage: _sendMessage,
+            hintText: 'Digite sua mensagem...',
           ),
         ],
       ),

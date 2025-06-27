@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import '../core/themes.dart';
+import 'custom_icon.dart';
 
-/// Widget para entrada de mensagens com dois botões de envio
+/// Widget de input com dois botões para simular conversas
 /// Segue as convenções de nomenclatura e boas práticas
 class DualMessageInput extends StatefulWidget {
-  final Function(String) onSendUserMessage;
-  final Function(String) onSendOtherSideMessage;
+  final Function(String, bool) onSendMessage;
+  final String? hintText;
 
   const DualMessageInput({
     super.key,
-    required this.onSendUserMessage,
-    required this.onSendOtherSideMessage,
+    required this.onSendMessage,
+    this.hintText,
   });
 
   @override
@@ -18,118 +20,110 @@ class DualMessageInput extends StatefulWidget {
 
 class _DualMessageInputState extends State<DualMessageInput> {
   final TextEditingController _controller = TextEditingController();
-  bool _isComposing = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  /// Envia mensagem do lado direito (usuário)
-  void _handleSendUserMessage() {
-    if (_controller.text.trim().isEmpty) return;
-
-    widget.onSendUserMessage(_controller.text);
-    _controller.clear();
-    setState(() {
-      _isComposing = false;
-    });
-  }
-
-  /// Envia mensagem do lado esquerdo (outro lado)
-  void _handleSendOtherSideMessage() {
-    if (_controller.text.trim().isEmpty) return;
-
-    widget.onSendOtherSideMessage(_controller.text);
-    _controller.clear();
-    setState(() {
-      _isComposing = false;
-    });
-  }
-
-  /// Atualiza o estado de composição
-  void _handleChanged(String text) {
-    setState(() {
-      _isComposing = text.trim().isNotEmpty;
-    });
+  void _sendMessage(bool isFromUser) {
+    final text = _controller.text.trim();
+    if (text.isNotEmpty) {
+      widget.onSendMessage(text, isFromUser);
+      _controller.clear();
+      _focusNode.unfocus();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+        color: isDark ? Colors.grey.shade900 : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+            width: 1,
           ),
-        ],
+        ),
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Campo de texto
-            TextField(
-              controller: _controller,
-              onChanged: _handleChanged,
-              decoration: InputDecoration(
-                hintText: 'Digite sua mensagem...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: theme.colorScheme.surfaceVariant,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(
+                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
                 ),
               ),
-              maxLines: null,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 12),
-            // Botões de envio
-            Row(
-              children: [
-                // Botão do lado esquerdo (outro lado)
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isComposing ? _handleSendOtherSideMessage : null,
-                    icon: const Icon(Icons.arrow_back),
-                    label: const Text('Outro Lado'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.secondary,
-                      foregroundColor: theme.colorScheme.onSecondary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                decoration: InputDecoration(
+                  hintText: widget.hintText ?? 'Digite sua mensagem...',
+                  hintStyle: TextStyle(
+                    color: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Botão do lado direito (usuário)
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isComposing ? _handleSendUserMessage : null,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Você'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 16,
                 ),
-              ],
+                maxLines: null,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _sendMessage(true),
+              ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 8),
+          // Botão "Outro Lado"
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.orange.shade700 : Colors.orange.shade500,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: IconButton(
+              onPressed: () => _sendMessage(false),
+              icon: const CustomIcon(
+                emoji: '⬅',
+                size: 22,
+              ),
+              color: Colors.white,
+              tooltip: 'Enviar como outro lado',
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Botão "Você"
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? Colors.blue.shade600 : Colors.blue.shade500,
+              borderRadius: BorderRadius.circular(25),
+            ),
+            child: IconButton(
+              onPressed: () => _sendMessage(true),
+              icon: const CustomIcon(
+                emoji: '➡',
+                size: 22,
+              ),
+              color: Colors.white,
+              tooltip: 'Enviar como você',
+            ),
+          ),
+        ],
       ),
     );
   }

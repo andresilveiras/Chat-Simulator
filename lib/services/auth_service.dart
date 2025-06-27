@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// Serviço responsável pela autenticação (versão mock para desenvolvimento)
 /// Segue as convenções de nomenclatura e boas práticas
 class AuthService {

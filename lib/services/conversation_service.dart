@@ -3,7 +3,9 @@ import '../models/conversation.dart';
 /// Serviço responsável pelas operações de conversas (versão mock para desenvolvimento)
 /// Segue as convenções de nomenclatura e boas práticas
 class ConversationService {
-  final List<Conversation> _mockConversations = [];
+  final List<Conversation> _mockConversations = [
+    // Lista vazia para não iniciar com conversas de teste
+  ];
 
   /// Obtém todas as conversas do usuário
   Future<List<Conversation>> getConversations() async {
@@ -81,6 +83,15 @@ class ConversationService {
       }
     } catch (e) {
       print('Erro ao atualizar última mensagem: $e');
+    }
+  }
+
+  /// Atualiza o nome do outro lado de uma conversa
+  Future<void> updateOtherSideName(String conversationId, String newName) async {
+    final index = _mockConversations.indexWhere((c) => c.id == conversationId);
+    if (index != -1) {
+      final conversation = _mockConversations[index];
+      _mockConversations[index] = conversation.copyWith(otherSideName: newName);
     }
   }
 } 

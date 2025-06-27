@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'core/themes.dart';
 import 'screens/login_screen.dart';
-import 'screens/conversations_screen.dart';
 
 /// Widget principal do aplicativo Chat Simulator
 /// Configura o MaterialApp com tema e rotas

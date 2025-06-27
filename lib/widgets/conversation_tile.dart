@@ -1,91 +1,67 @@
 import 'package:flutter/material.dart';
 import '../models/conversation.dart';
+import '../core/themes.dart';
+import 'custom_icon.dart';
 
-/// Widget para exibir uma conversa na lista
+/// Widget para exibir um item de conversa na lista
 /// Segue as convenções de nomenclatura e boas práticas
 class ConversationTile extends StatelessWidget {
   final Conversation conversation;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
 
   const ConversationTile({
     super.key,
     required this.conversation,
     required this.onTap,
-    required this.onDelete,
+    this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final isDark = theme.brightness == Brightness.dark;
+
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      elevation: isDark ? 2 : 1,
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary,
-          child: conversation.imageUrl != null
-              ? ClipOval(
-                  child: Image.network(
-                    conversation.imageUrl!,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Text(
-                        conversation.title.isNotEmpty 
-                            ? conversation.title[0].toUpperCase()
-                            : 'C',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    },
-                  ),
-                )
-              : Text(
-                  conversation.title.isNotEmpty 
-                      ? conversation.title[0].toUpperCase()
-                      : 'C',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+        contentPadding: const EdgeInsets.all(16),
+        leading: CustomAvatar(
+          radius: 28,
+          backgroundColor: isDark ? Colors.blue.shade800 : Colors.blue.shade100,
+          textColor: isDark ? Colors.white : Colors.blue.shade700,
+          text: conversation.title.characters.firstOrNull?.toUpperCase(),
+          emoji: '💬',
         ),
         title: Text(
           conversation.title,
-          style: const TextStyle(
+          style: TextStyle(
+            fontSize: 16,
             fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : Colors.black87,
           ),
         ),
         subtitle: Text(
           '${conversation.messageCount} mensagens',
           style: TextStyle(
-            color: theme.colorScheme.onSurfaceVariant,
-            fontSize: 12,
+            fontSize: 14,
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
           ),
         ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'delete') {
-              onDelete();
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Deletar', style: TextStyle(color: Colors.red)),
-                ],
+        trailing: onDelete != null
+            ? IconButton(
+                onPressed: onDelete,
+                icon: const CustomIcon(
+                  emoji: '🗑️',
+                  size: 22,
+                ),
+                color: Colors.red,
+              )
+            : const CustomIcon(
+                emoji: '➡️',
+                size: 22,
               ),
-            ),
-          ],
-        ),
         onTap: onTap,
       ),
     );

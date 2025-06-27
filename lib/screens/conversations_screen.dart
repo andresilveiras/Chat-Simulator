@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../services/conversation_service.dart';
 import 'chat_screen.dart';
 import '../widgets/conversation_tile.dart';
+import '../widgets/custom_icon.dart';
 
 /// Tela principal com lista de conversas
 /// Segue as convenções de nomenclatura e boas práticas
@@ -176,7 +177,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
         actions: [
           IconButton(
             onPressed: _signOut,
-            icon: const Icon(Icons.logout),
+            icon: const CustomIcon(
+              emoji: '🚪',
+              size: 24,
+            ),
             tooltip: 'Sair',
           ),
         ],
@@ -190,10 +194,9 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.chat_bubble_outline,
+                      const CustomIcon(
+                        emoji: '💬',
                         size: 80,
-                        color: Colors.grey,
                       ),
                       const SizedBox(height: 16),
                       const Text(
@@ -235,7 +238,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createNewConversation,
-        child: const Icon(Icons.add),
+        child: const CustomIcon(
+          emoji: '➕',
+          size: 28,
+        ),
       ),
     );
   }

@@ -3,7 +3,9 @@ import '../models/message.dart';
 /// Serviço responsável pelas operações de chat (versão mock para desenvolvimento)
 /// Segue as convenções de nomenclatura e boas práticas
 class ChatService {
-  final Map<String, List<Message>> _mockMessages = {};
+  final Map<String, List<Message>> _mockMessages = {
+    // Mapa vazio para não iniciar com mensagens de teste
+  };
 
   /// Obtém todas as mensagens de uma conversa específica
   Future<List<Message>> getMessages(String conversationId) async {

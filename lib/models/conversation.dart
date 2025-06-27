@@ -7,6 +7,7 @@ class Conversation {
   final DateTime createdAt;
   final DateTime lastMessageAt;
   final int messageCount;
+  final String? otherSideName;
 
   /// Construtor da classe Conversation
   const Conversation({
@@ -16,6 +17,7 @@ class Conversation {
     required this.createdAt,
     required this.lastMessageAt,
     required this.messageCount,
+    this.otherSideName,
   });
 
   /// Cria uma cópia da conversa com campos modificados
@@ -26,6 +28,7 @@ class Conversation {
     DateTime? createdAt,
     DateTime? lastMessageAt,
     int? messageCount,
+    String? otherSideName,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -34,6 +37,7 @@ class Conversation {
       createdAt: createdAt ?? this.createdAt,
       lastMessageAt: lastMessageAt ?? this.lastMessageAt,
       messageCount: messageCount ?? this.messageCount,
+      otherSideName: otherSideName ?? this.otherSideName,
     );
   }
 
