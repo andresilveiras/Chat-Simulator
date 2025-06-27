@@ -9,12 +9,14 @@ class ConversationTile extends StatelessWidget {
   final Conversation conversation;
   final VoidCallback onTap;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
   const ConversationTile({
     super.key,
     required this.conversation,
     required this.onTap,
     this.onDelete,
+    this.onEdit,
   });
 
   @override
@@ -49,19 +51,36 @@ class ConversationTile extends StatelessWidget {
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
           ),
         ),
-        trailing: onDelete != null
-            ? IconButton(
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (onEdit != null)
+              IconButton(
+                onPressed: onEdit,
+                icon: const CustomIcon(
+                  emoji: '✏️',
+                  size: 20,
+                ),
+                color: Colors.blue,
+                tooltip: 'Editar título',
+              ),
+            if (onDelete != null)
+              IconButton(
                 onPressed: onDelete,
                 icon: const CustomIcon(
                   emoji: '🗑️',
-                  size: 22,
+                  size: 20,
                 ),
                 color: Colors.red,
-              )
-            : const CustomIcon(
+                tooltip: 'Excluir conversa',
+              ),
+            if (onEdit == null && onDelete == null)
+              const CustomIcon(
                 emoji: '➡️',
                 size: 22,
               ),
+          ],
+        ),
         onTap: onTap,
       ),
     );
