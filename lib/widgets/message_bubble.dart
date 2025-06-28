@@ -52,23 +52,25 @@ class MessageBubble extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (imageUrl != null && imageUrl!.startsWith('file://'))
-                    CircleAvatar(
-                      radius: 10,
-                      backgroundImage: FileImage(File(imageUrl!.substring(7))),
-                    )
-                  else
-                    CustomIcon(
-                      emoji: isFromCurrentUser ? '🧑‍💻' : '🧑‍💻',
-                      size: 16,
-                      color: isFromCurrentUser
-                          ? Colors.white
-                          : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
-                    ),
-                  const SizedBox(width: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (imageUrl != null && imageUrl!.isNotEmpty)
+                  CircleAvatar(
+                    radius: 10,
+                    backgroundImage: imageUrl!.startsWith('http')
+                        ? NetworkImage(imageUrl!)
+                        : FileImage(File(imageUrl!.replaceFirst('file://', ''))) as ImageProvider,
+                  )
+                else
+                  CustomIcon(
+                    emoji: isFromCurrentUser ? '🧑‍💻' : '🧑‍💻',
+                    size: 16,
+                    color: isFromCurrentUser
+                        ? Colors.white
+                        : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+                  ),
+                const SizedBox(width: 8),
                   Text(
                     isFromCurrentUser
                         ? (displayName ?? 'Você')

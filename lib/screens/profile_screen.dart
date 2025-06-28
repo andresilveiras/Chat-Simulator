@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import '../services/profile_service.dart';
+import '../services/auth_service.dart';
+import '../services/image_storage_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -13,6 +15,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileService _profileService = ProfileService();
+  final AuthService _authService = AuthService();
+  final ImageStorageService _imageStorageService = ImageStorageService();
   final TextEditingController _nameController = TextEditingController();
   String? _imagePath;
   bool _loading = true;
@@ -24,11 +28,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
-    final name = await _profileService.getDisplayName();
-    final imagePath = await _profileService.getProfileImagePath();
+    final profile = await _profileService.getProfile();
     setState(() {
-      _nameController.text = name;
-      _imagePath = imagePath;
+      _nameController.text = profile?['displayName'] ?? 'Você';
+      _imagePath = profile?['imageUrl'];
       _loading = false;
     });
   }
@@ -57,16 +60,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
     );
     if (cropped == null) return;
-    await _profileService.setProfileImagePath(cropped.path);
-    setState(() {
-      _imagePath = cropped.path;
-    });
+
+    final userId = _authService.currentUserId;
+    String? imageUrl;
+    if (userId.isNotEmpty) {
+      try{
+        // Usuário autenticado: faz upload para o Storage
+        imageUrl = await _imageStorageService.uploadProfileImage(userId, File(cropped.path));
+        // Salva a URL no Firestore junto com o nome (ou só a imagem se nome não mudou)
+        await _profileService.saveProfile(displayName: _nameController.text.trim(), imageUrl: imageUrl);
+        setState(() {
+          _imagePath = imageUrl;
+        });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Imagem de perfil atualizada com sucesso!'), backgroundColor: Colors.green),
+          );
+      }catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Falha no upload da imagem: $e'), backgroundColor: Colors.red),
+      );
+    }
+    } else {
+      // Usuário anônimo: salva localmente
+      await _profileService.setProfileImagePath(cropped.path);
+      setState(() {
+        _imagePath = cropped.path;
+      });
+    }
   }
 
   Future<void> _saveProfile() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
-    await _profileService.setDisplayName(name);
+    final userId = _authService.currentUserId;
+    if (userId.isNotEmpty) {
+      await _profileService.saveProfile(displayName: name, imageUrl: _imagePath);
+    } else {
+      await _profileService.setDisplayName(name);
+    }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Perfil salvo com sucesso!'), backgroundColor: Colors.green),
@@ -93,7 +124,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: CircleAvatar(
                       radius: 48,
                       backgroundColor: Colors.blue.shade100,
-                      backgroundImage: _imagePath != null ? FileImage(File(_imagePath!)) : null,
+                      backgroundImage: _imagePath != null
+                          ? (_imagePath!.startsWith('http')
+                              ? NetworkImage(_imagePath!)
+                              : FileImage(File(_imagePath!)) as ImageProvider)
+                          : null,
                       child: _imagePath == null
                           ? const Text('👤', style: TextStyle(fontSize: 48, color: Colors.blue))
                           : null,

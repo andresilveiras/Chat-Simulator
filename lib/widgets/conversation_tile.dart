@@ -7,19 +7,17 @@ import 'custom_icon.dart';
 /// Segue as convenções de nomenclatura e boas práticas
 class ConversationTile extends StatelessWidget {
   final Conversation conversation;
-  final VoidCallback onTap;
-  final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
   final VoidCallback? onEditImage;
 
   const ConversationTile({
-    super.key,
+    Key? key,
     required this.conversation,
-    required this.onTap,
-    this.onDelete,
     this.onEdit,
+    this.onDelete,
     this.onEditImage,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +92,6 @@ class ConversationTile extends StatelessWidget {
               ),
           ],
         ),
-        onTap: onTap,
       ),
     );
   }
