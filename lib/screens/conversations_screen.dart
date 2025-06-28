@@ -6,6 +6,10 @@ import 'chat_screen.dart';
 import '../widgets/conversation_tile.dart';
 import '../widgets/custom_icon.dart';
 import '../screens/login_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 
 /// Enum para tipos de ordenação das conversas
 enum SortType {
@@ -269,6 +273,65 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     }
   }
 
+  /// Edita a imagem da conversa
+  Future<void> _editConversationImage(Conversation conversation) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+      if (picked == null) return;
+
+      // Crop circular
+      final cropped = await ImageCropper().cropImage(
+        sourcePath: picked.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 90,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Recortar imagem',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            hideBottomControls: true,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Recortar imagem',
+            aspectRatioLockEnabled: true,
+          ),
+        ],
+      );
+      if (cropped == null) return;
+
+      // Upload para Firebase Storage
+      final storage = FirebaseStorage.instance;
+      final ref = storage.ref().child('conversation_images/${conversation.id}.jpg');
+      final uploadTask = await ref.putFile(File(cropped.path));
+      final imageUrl = await uploadTask.ref.getDownloadURL();
+
+      // Atualizar conversa
+      final updated = conversation.copyWith(imageUrl: imageUrl);
+      await _conversationService.updateConversation(updated);
+      setState(() {
+        final idx = _allConversations.indexWhere((c) => c.id == conversation.id);
+        if (idx != -1) {
+          _allConversations[idx] = updated;
+        }
+        _applySorting();
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Imagem atualizada com sucesso!'), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao atualizar imagem: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   /// Realiza logout
   Future<void> _signOut() async {
     try {
@@ -420,6 +483,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                             },
                             onEdit: () => _editConversationTitle(conversation),
                             onDelete: () => _deleteConversation(conversation),
+                            onEditImage: () => _editConversationImage(conversation),
                           );
                         },
                       ),

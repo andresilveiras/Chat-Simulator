@@ -10,6 +10,7 @@ class ConversationTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onEditImage;
 
   const ConversationTile({
     super.key,
@@ -17,6 +18,7 @@ class ConversationTile extends StatelessWidget {
     required this.onTap,
     this.onDelete,
     this.onEdit,
+    this.onEditImage,
   });
 
   @override
@@ -35,6 +37,7 @@ class ConversationTile extends StatelessWidget {
           textColor: isDark ? Colors.white : Colors.blue.shade700,
           text: conversation.title.characters.firstOrNull?.toUpperCase(),
           emoji: '💬',
+          imageUrl: conversation.imageUrl,
         ),
         title: Text(
           conversation.title,
@@ -54,6 +57,16 @@ class ConversationTile extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (onEditImage != null)
+              IconButton(
+                onPressed: onEditImage,
+                icon: const CustomIcon(
+                  emoji: '📷',
+                  size: 20,
+                ),
+                color: Colors.orange,
+                tooltip: 'Editar imagem',
+              ),
             if (onEdit != null)
               IconButton(
                 onPressed: onEdit,
@@ -74,7 +87,7 @@ class ConversationTile extends StatelessWidget {
                 color: Colors.red,
                 tooltip: 'Excluir conversa',
               ),
-            if (onEdit == null && onDelete == null)
+            if (onEdit == null && onDelete == null && onEditImage == null)
               const CustomIcon(
                 emoji: '➡️',
                 size: 22,

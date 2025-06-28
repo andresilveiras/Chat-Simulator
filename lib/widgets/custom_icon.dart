@@ -32,6 +32,7 @@ class CustomAvatar extends StatelessWidget {
   final Color textColor;
   final String? text;
   final String? emoji;
+  final String? imageUrl;
 
   const CustomAvatar({
     super.key,
@@ -40,10 +41,18 @@ class CustomAvatar extends StatelessWidget {
     required this.textColor,
     this.text,
     this.emoji,
+    this.imageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: backgroundColor,
+        backgroundImage: NetworkImage(imageUrl!),
+      );
+    }
     return CircleAvatar(
       radius: radius,
       backgroundColor: backgroundColor,
