@@ -6,6 +6,7 @@ import '../models/message.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/dual_message_input.dart';
 import '../widgets/custom_icon.dart';
+import '../services/profile_service.dart';
 
 /// Tela de conversa com dois lados controlados manualmente
 /// Segue as convenções de nomenclatura e boas práticas
@@ -24,15 +25,28 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final ChatService _chatService = ChatService();
   final ConversationService _conversationService = ConversationService();
+  final ProfileService _profileService = ProfileService();
   final List<Message> _messages = [];
   bool _isLoading = true;
   String? _otherSideName;
+  String? _userDisplayName;
+  String? _userImagePath;
 
   @override
   void initState() {
     super.initState();
     _otherSideName = widget.conversation.otherSideName ?? 'Outro Lado';
+    _loadProfile();
     _loadMessages();
+  }
+
+  Future<void> _loadProfile() async {
+    final name = await _profileService.getDisplayName();
+    final imagePath = await _profileService.getProfileImagePath();
+    setState(() {
+      _userDisplayName = name;
+      _userImagePath = imagePath;
+    });
   }
 
   /// Carrega mensagens da conversa
@@ -307,7 +321,7 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
             onPressed: _editOtherSideName,
             icon: const CustomIcon(
-              emoji: '📝',
+              emoji: '✏️',
               size: 22,
             ),
             tooltip: 'Editar nome do outro lado',
@@ -364,12 +378,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final message = _messages[_messages.length - 1 - index];
+                          final isUser = message.isFromUser;
                           return MessageBubble(
                             message: message,
-                            isFromCurrentUser: message.isFromUser,
+                            isFromCurrentUser: isUser,
                             otherSideName: _otherSideName,
                             onLongPress: () => _showMessageOptions(message),
-                            imageUrl: widget.conversation.imageUrl,
+                            imageUrl: isUser ? _userImagePath : widget.conversation.imageUrl,
+                            displayName: isUser ? _userDisplayName : null,
                           );
                         },
                       ),

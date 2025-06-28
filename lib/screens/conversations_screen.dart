@@ -9,6 +9,7 @@ import '../screens/login_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
+import 'profile_screen.dart';
 
 /// Enum para tipos de ordenação das conversas
 enum SortType {
@@ -366,6 +367,17 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       appBar: AppBar(
         title: const Text('Chat Simulator'),
         actions: [
+          IconButton(
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+              // Atualiza a tela após editar o perfil
+              setState(() {});
+            },
+            icon: const Icon(Icons.person),
+            tooltip: 'Perfil',
+          ),
           // Botão de ordenação
           PopupMenuButton<SortType>(
             icon: const CustomIcon(

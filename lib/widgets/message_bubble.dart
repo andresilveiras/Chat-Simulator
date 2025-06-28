@@ -12,6 +12,7 @@ class MessageBubble extends StatelessWidget {
   final String? otherSideName;
   final VoidCallback? onLongPress;
   final String? imageUrl;
+  final String? displayName;
 
   const MessageBubble({
     super.key,
@@ -20,6 +21,7 @@ class MessageBubble extends StatelessWidget {
     this.otherSideName,
     this.onLongPress,
     this.imageUrl,
+    this.displayName,
   });
 
   @override
@@ -53,7 +55,7 @@ class MessageBubble extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (!isFromCurrentUser && imageUrl != null && imageUrl!.startsWith('file://'))
+                  if (imageUrl != null && imageUrl!.startsWith('file://'))
                     CircleAvatar(
                       radius: 10,
                       backgroundImage: FileImage(File(imageUrl!.substring(7))),
@@ -68,7 +70,9 @@ class MessageBubble extends StatelessWidget {
                     ),
                   const SizedBox(width: 8),
                   Text(
-                    isFromCurrentUser ? 'Você' : (otherSideName ?? 'Outro Lado'),
+                    isFromCurrentUser
+                        ? (displayName ?? 'Você')
+                        : (otherSideName ?? 'Outro Lado'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
