@@ -8,7 +8,6 @@ import '../widgets/custom_icon.dart';
 import '../screens/login_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
 /// Enum para tipos de ordenação das conversas
@@ -273,7 +272,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     }
   }
 
-  /// Edita a imagem da conversa
+  /// Edita a imagem da conversa (versão temporária - apenas metadados)
   Future<void> _editConversationImage(Conversation conversation) async {
     try {
       final picker = ImagePicker();
@@ -302,15 +301,14 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       );
       if (cropped == null) return;
 
-      // Upload para Firebase Storage
-      final storage = FirebaseStorage.instance;
-      final ref = storage.ref().child('conversation_images/${conversation.id}.jpg');
-      final uploadTask = await ref.putFile(File(cropped.path));
-      final imageUrl = await uploadTask.ref.getDownloadURL();
-
-      // Atualizar conversa
-      final updated = conversation.copyWith(imageUrl: imageUrl);
+      // Atualizar conversa com caminho local real
+      final updated = conversation.copyWith(
+        imageUrl: 'file://${cropped.path}', // Caminho local real
+        // Podemos adicionar um campo extra para metadados se necessário
+      );
+      
       await _conversationService.updateConversation(updated);
+      
       setState(() {
         final idx = _allConversations.indexWhere((c) => c.id == conversation.id);
         if (idx != -1) {
@@ -318,15 +316,23 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
         }
         _applySorting();
       });
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Imagem atualizada com sucesso!'), backgroundColor: Colors.green),
+          const SnackBar(
+            content: Text('Imagem processada! (Salva localmente - Firebase Storage não configurado)'), 
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar imagem: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Erro ao processar imagem: $e'), 
+            backgroundColor: Colors.red
+          ),
         );
       }
     }
