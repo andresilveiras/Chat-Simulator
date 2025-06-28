@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../core/themes.dart';
 import 'custom_icon.dart';
+import 'dart:io';
 
 /// Widget para exibir uma bolha de mensagem
 /// Segue as convenções de nomenclatura e boas práticas
@@ -10,6 +11,7 @@ class MessageBubble extends StatelessWidget {
   final bool isFromCurrentUser;
   final String? otherSideName;
   final VoidCallback? onLongPress;
+  final String? imageUrl;
 
   const MessageBubble({
     super.key,
@@ -17,6 +19,7 @@ class MessageBubble extends StatelessWidget {
     required this.isFromCurrentUser,
     this.otherSideName,
     this.onLongPress,
+    this.imageUrl,
   });
 
   @override
@@ -50,13 +53,19 @@ class MessageBubble extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CustomIcon(
-                    emoji: isFromCurrentUser ? '🧑‍💻' : '🧑‍💻',
-                    size: 16,
-                    color: isFromCurrentUser
-                        ? Colors.white
-                        : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
-                  ),
+                  if (!isFromCurrentUser && imageUrl != null && imageUrl!.startsWith('file://'))
+                    CircleAvatar(
+                      radius: 10,
+                      backgroundImage: FileImage(File(imageUrl!.substring(7))),
+                    )
+                  else
+                    CustomIcon(
+                      emoji: isFromCurrentUser ? '🧑‍💻' : '🧑‍💻',
+                      size: 16,
+                      color: isFromCurrentUser
+                          ? Colors.white
+                          : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+                    ),
                   const SizedBox(width: 8),
                   Text(
                     isFromCurrentUser ? 'Você' : (otherSideName ?? 'Outro Lado'),

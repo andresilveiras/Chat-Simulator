@@ -369,6 +369,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             isFromCurrentUser: message.isFromUser,
                             otherSideName: _otherSideName,
                             onLongPress: () => _showMessageOptions(message),
+                            imageUrl: widget.conversation.imageUrl,
                           );
                         },
                       ),
