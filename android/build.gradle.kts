@@ -1,3 +1,7 @@
+extra.set("compileSdkVersion", 33)
+extra.set("targetSdkVersion", 33)
+extra.set("minSdkVersion", 23)
+
 buildscript {
     repositories {
         google()

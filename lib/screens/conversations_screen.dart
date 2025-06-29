@@ -6,6 +6,11 @@ import 'chat_screen.dart';
 import '../widgets/conversation_tile.dart';
 import '../widgets/custom_icon.dart';
 import '../screens/login_screen.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'dart:io';
+import 'profile_screen.dart';
+import '../services/image_storage_service.dart';
 
 /// Enum para tipos de ordenação das conversas
 enum SortType {
@@ -31,6 +36,7 @@ class ConversationsScreen extends StatefulWidget {
 class _ConversationsScreenState extends State<ConversationsScreen> {
   final AuthService _authService = AuthService();
   final ConversationService _conversationService = ConversationService();
+  final ImageStorageService _imageStorageService = ImageStorageService();
   final List<Conversation> _conversations = [];
   final List<Conversation> _allConversations = [];
   bool _isLoading = true;
@@ -269,6 +275,93 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     }
   }
 
+  /// Edita a imagem da conversa (agora salva no Storage e Firestore)
+  Future<void> _editConversationImage(Conversation conversation) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+      if (picked == null) return;
+
+      // Crop circular
+      final cropped = await ImageCropper().cropImage(
+        sourcePath: picked.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 90,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Recortar imagem',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            hideBottomControls: true,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Recortar imagem',
+            aspectRatioLockEnabled: true,
+          ),
+        ],
+      );
+      if (cropped == null) return;
+
+      String? imageUrl;
+      if (_authService.isAuthenticated && !_authService.currentUser!.isAnonymous) {
+        try{
+          // Upload para o Firebase Storage
+          imageUrl = await _imageStorageService.uploadConversationImage(
+            _authService.currentUserId,
+            conversation.id,
+            File(cropped.path),
+          );
+          // Atualiza a conversa no Firestore
+          final updated = conversation.copyWith(imageUrl: imageUrl);
+          await _conversationService.updateConversation(updated);
+          setState(() {
+            final idx = _allConversations.indexWhere((c) => c.id == conversation.id);
+            if (idx != -1) {
+              _allConversations[idx] = updated;
+            }
+            _applySorting();
+          });
+        }catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Falha no upload da imagem: $e'), backgroundColor: Colors.red),
+        );
+      }
+      } else {
+        // Modo local
+        final updated = conversation.copyWith(imageUrl: 'file://${cropped.path}');
+        await _conversationService.updateConversation(updated);
+        setState(() {
+          final idx = _allConversations.indexWhere((c) => c.id == conversation.id);
+          if (idx != -1) {
+            _allConversations[idx] = updated;
+          }
+          _applySorting();
+        });
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Imagem da conversa atualizada com sucesso!'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao processar imagem: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   /// Realiza logout
   Future<void> _signOut() async {
     try {
@@ -291,12 +384,59 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     }
   }
 
+  void _showConversationOptions(Conversation conversation) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Text('✏️', style: TextStyle(fontSize: 22)),
+              title: const Text('Editar título'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _editConversationTitle(conversation);
+              },
+            ),
+            ListTile(
+              leading: const Text('🖼️', style: TextStyle(fontSize: 22)),
+              title: const Text('Editar imagem'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _editConversationImage(conversation);
+              },
+            ),
+            ListTile(
+              leading: const Text('🗑️', style: TextStyle(fontSize: 22)),
+              title: const Text('Excluir'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _deleteConversation(conversation);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat Simulator'),
         actions: [
+          IconButton(
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+              // Atualiza a tela após editar o perfil
+              setState(() {});
+            },
+            icon: const Icon(Icons.person),
+            tooltip: 'Perfil',
+          ),
           // Botão de ordenação
           PopupMenuButton<SortType>(
             icon: const CustomIcon(
@@ -407,8 +547,7 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                         itemCount: _conversations.length,
                         itemBuilder: (context, index) {
                           final conversation = _conversations[index];
-                          return ConversationTile(
-                            conversation: conversation,
+                          return GestureDetector(
                             onTap: () async {
                               await Navigator.of(context).push(
                                 MaterialPageRoute(
@@ -418,8 +557,10 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
                               // Recarrega conversas quando voltar do chat
                               _loadConversations();
                             },
-                            onEdit: () => _editConversationTitle(conversation),
-                            onDelete: () => _deleteConversation(conversation),
+                            onLongPress: () => _showConversationOptions(conversation),
+                            child: ConversationTile(
+                              conversation: conversation,
+                            ),
                           );
                         },
                       ),

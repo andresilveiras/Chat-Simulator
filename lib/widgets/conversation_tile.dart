@@ -7,17 +7,17 @@ import 'custom_icon.dart';
 /// Segue as convenções de nomenclatura e boas práticas
 class ConversationTile extends StatelessWidget {
   final Conversation conversation;
-  final VoidCallback onTap;
-  final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEditImage;
 
   const ConversationTile({
-    super.key,
+    Key? key,
     required this.conversation,
-    required this.onTap,
-    this.onDelete,
     this.onEdit,
-  });
+    this.onDelete,
+    this.onEditImage,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +35,7 @@ class ConversationTile extends StatelessWidget {
           textColor: isDark ? Colors.white : Colors.blue.shade700,
           text: conversation.title.characters.firstOrNull?.toUpperCase(),
           emoji: '💬',
+          imageUrl: conversation.imageUrl,
         ),
         title: Text(
           conversation.title,
@@ -54,6 +55,16 @@ class ConversationTile extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (onEditImage != null)
+              IconButton(
+                onPressed: onEditImage,
+                icon: const CustomIcon(
+                  emoji: '📷',
+                  size: 20,
+                ),
+                color: Colors.orange,
+                tooltip: 'Editar imagem',
+              ),
             if (onEdit != null)
               IconButton(
                 onPressed: onEdit,
@@ -74,14 +85,13 @@ class ConversationTile extends StatelessWidget {
                 color: Colors.red,
                 tooltip: 'Excluir conversa',
               ),
-            if (onEdit == null && onDelete == null)
+            if (onEdit == null && onDelete == null && onEditImage == null)
               const CustomIcon(
                 emoji: '➡️',
                 size: 22,
               ),
           ],
         ),
-        onTap: onTap,
       ),
     );
   }

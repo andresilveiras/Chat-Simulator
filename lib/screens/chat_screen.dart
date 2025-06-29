@@ -6,6 +6,8 @@ import '../models/message.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/dual_message_input.dart';
 import '../widgets/custom_icon.dart';
+import '../services/profile_service.dart';
+import '../services/auth_service.dart';
 
 /// Tela de conversa com dois lados controlados manualmente
 /// Segue as convenções de nomenclatura e boas práticas
@@ -22,8 +24,10 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final AuthService _authService = AuthService();
   final ChatService _chatService = ChatService();
   final ConversationService _conversationService = ConversationService();
+  final ProfileService _profileService = ProfileService();
   final List<Message> _messages = [];
   bool _isLoading = true;
   String? _otherSideName;
@@ -295,6 +299,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = _authService.currentUserId;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -307,7 +312,7 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
             onPressed: _editOtherSideName,
             icon: const CustomIcon(
-              emoji: '📝',
+              emoji: '✏️',
               size: 22,
             ),
             tooltip: 'Editar nome do outro lado',
@@ -364,12 +369,35 @@ class _ChatScreenState extends State<ChatScreen> {
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final message = _messages[_messages.length - 1 - index];
-                          return MessageBubble(
-                            message: message,
-                            isFromCurrentUser: message.isFromUser,
-                            otherSideName: _otherSideName,
-                            onLongPress: () => _showMessageOptions(message),
-                          );
+                          final isUser = message.isFromUser;
+                          if (isUser) {
+                            // Mensagem do usuário: buscar perfil em tempo real
+                            return FutureBuilder<Map<String, dynamic>?> (
+                              future: _profileService.getProfile(),
+                              builder: (context, snapshot) {
+                                final displayName = snapshot.data?['displayName'] ?? 'Você';
+                                final imageUrl = snapshot.data?['imageUrl'];
+                                return MessageBubble(
+                                  message: message,
+                                  isFromCurrentUser: true,
+                                  otherSideName: _otherSideName,
+                                  onLongPress: () => _showMessageOptions(message),
+                                  imageUrl: imageUrl,
+                                  displayName: displayName,
+                                );
+                              },
+                            );
+                          } else {
+                            // Mensagem do outro lado: usa dados da conversa
+                            return MessageBubble(
+                              message: message,
+                              isFromCurrentUser: false,
+                              otherSideName: _otherSideName,
+                              onLongPress: () => _showMessageOptions(message),
+                              imageUrl: widget.conversation.imageUrl,
+                              displayName: null,
+                            );
+                          }
                         },
                       ),
           ),
