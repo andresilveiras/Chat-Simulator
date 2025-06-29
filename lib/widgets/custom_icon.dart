@@ -27,6 +27,10 @@ class CustomIcon extends StatelessWidget {
 }
 
 /// Widget de avatar personalizado usando emoji ou inicial
+/// Suporta diferentes tipos de `imageUrl`:
+/// - `http://` ou `https://`: imagens salvas em cloud storage
+/// - `file://`: arquivos locais
+/// - `local://`: imagens já processadas/localizadas em cache (em caso de navegação anônima/offline)
 class CustomAvatar extends StatelessWidget {
   final double radius;
   final Color backgroundColor;

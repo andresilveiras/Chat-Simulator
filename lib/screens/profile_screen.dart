@@ -27,82 +27,131 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfile();
   }
 
+  /// Helper method para mostrar mensagem de sucesso
+  void _showSuccessMessage(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.green),
+      );
+    }
+  }
+
+  /// Helper method para mostrar mensagem de erro
+  void _showErrorMessage(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    }
+  }
+
   Future<void> _loadProfile() async {
-    final profile = await _profileService.getProfile();
-    setState(() {
-      _nameController.text = profile?['displayName'] ?? 'Você';
-      _imagePath = profile?['imageUrl'];
-      _loading = false;
-    });
+    try {
+      final profile = await _profileService.getProfile();
+      if (mounted) {
+        setState(() {
+          _nameController.text = profile?['displayName'] ?? 'Você';
+          _imagePath = profile?['imageUrl'];
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+        _showErrorMessage('Erro ao carregar perfil: $e');
+      }
+    }
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
-    if (picked == null) return;
-    final cropped = await ImageCropper().cropImage(
-      sourcePath: picked.path,
-      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-      compressFormat: ImageCompressFormat.jpg,
-      compressQuality: 90,
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: 'Recortar imagem',
-          toolbarColor: Colors.blue,
-          toolbarWidgetColor: Colors.white,
-          hideBottomControls: true,
-          lockAspectRatio: true,
-        ),
-        IOSUiSettings(
-          title: 'Recortar imagem',
-          aspectRatioLockEnabled: true,
-        ),
-      ],
-    );
-    if (cropped == null) return;
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+      if (picked == null) return;
 
-    final userId = _authService.currentUserId;
-    String? imageUrl;
-    if (userId.isNotEmpty) {
-      try{
-        // Usuário autenticado: faz upload para o Storage
-        imageUrl = await _imageStorageService.uploadProfileImage(userId, File(cropped.path));
-        // Salva a URL no Firestore junto com o nome (ou só a imagem se nome não mudou)
-        await _profileService.saveProfile(displayName: _nameController.text.trim(), imageUrl: imageUrl);
-        setState(() {
-          _imagePath = imageUrl;
-        });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Imagem de perfil atualizada com sucesso!'), backgroundColor: Colors.green),
-          );
-      }catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Falha no upload da imagem: $e'), backgroundColor: Colors.red),
+      // Crop circular
+      final cropped = await ImageCropper().cropImage(
+        sourcePath: picked.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        compressFormat: ImageCompressFormat.jpg,
+        compressQuality: 90,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Recortar imagem',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            hideBottomControls: true,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Recortar imagem',
+            aspectRatioLockEnabled: true,
+          ),
+        ],
       );
-    }
-    } else {
-      // Usuário anônimo: salva localmente
-      await _profileService.setProfileImagePath(cropped.path);
-      setState(() {
-        _imagePath = cropped.path;
-      });
+      if (cropped == null) return;
+
+      final userId = _authService.currentUserId;
+      String? imageUrl;
+      
+      if (userId.isNotEmpty) {
+        try {
+          // Usuário autenticado: faz upload para o Storage
+          imageUrl = await _imageStorageService.uploadProfileImage(userId, File(cropped.path));
+          // Salva a URL no Firestore junto com o nome
+          await _profileService.saveProfile(displayName: _nameController.text.trim(), imageUrl: imageUrl);
+          
+          if (mounted) {
+            setState(() {
+              _imagePath = imageUrl;
+            });
+            _showSuccessMessage('Imagem de perfil atualizada com sucesso!');
+          }
+        } catch (e) {
+          _showErrorMessage('Falha no upload da imagem: $e');
+        }
+      } else {
+        // Usuário anônimo: salva localmente
+        try {
+          await _profileService.setProfileImagePath(cropped.path);
+          if (mounted) {
+            setState(() {
+              _imagePath = cropped.path;
+            });
+            _showSuccessMessage('Imagem de perfil atualizada com sucesso!');
+          }
+        } catch (e) {
+          _showErrorMessage('Erro ao salvar imagem localmente: $e');
+        }
+      }
+    } catch (e) {
+      _showErrorMessage('Erro ao processar imagem: $e');
     }
   }
 
   Future<void> _saveProfile() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return;
-    final userId = _authService.currentUserId;
-    if (userId.isNotEmpty) {
-      await _profileService.saveProfile(displayName: name, imageUrl: _imagePath);
-    } else {
-      await _profileService.setDisplayName(name);
-    }
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Perfil salvo com sucesso!'), backgroundColor: Colors.green),
-      );
-      Navigator.of(context).pop(true);
+    try {
+      final name = _nameController.text.trim();
+      if (name.isEmpty) {
+        _showErrorMessage('Nome não pode estar vazio');
+        return;
+      }
+      
+      final userId = _authService.currentUserId;
+      if (userId.isNotEmpty) {
+        await _profileService.saveProfile(displayName: name, imageUrl: _imagePath);
+      } else {
+        await _profileService.setDisplayName(name);
+      }
+      
+      if (mounted) {
+        _showSuccessMessage('Perfil salvo com sucesso!');
+        Navigator.of(context).pop(true);
+      }
+    } catch (e) {
+      _showErrorMessage('Erro ao salvar perfil: $e');
     }
   }
 

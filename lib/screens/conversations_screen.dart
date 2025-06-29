@@ -323,9 +323,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             }
             _applySorting();
           });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Imagem da conversa atualizada com sucesso!'), backgroundColor: Colors.green),
-            );
         }catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Falha no upload da imagem: $e'), backgroundColor: Colors.red),
@@ -347,8 +344,8 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Imagem processada!'),
-            backgroundColor: Colors.orange,
+            content: Text('Imagem da conversa atualizada com sucesso!'),
+            backgroundColor: Colors.green,
             duration: Duration(seconds: 3),
           ),
         );
