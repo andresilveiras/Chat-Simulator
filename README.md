@@ -2,6 +2,18 @@
 
 Chat Simulator é um aplicativo Flutter que permite simular conversas entre dois lados controlados manualmente pelo usuário. O app usa Firebase para autenticação, armazenamento em nuvem (Firestore) e upload de imagens (Storage), garantindo que suas conversas sejam salvas e sincronizadas entre dispositivos.
 
+## 🔒 Configuração de Segurança
+
+⚠️ **IMPORTANTE**: Este repositório não contém arquivos de configuração do Firebase por questões de segurança. Para usar o app, você precisa configurar seu próprio projeto Firebase:
+
+1. **Configure o Firebase** (veja seção "🔥 Configuração do Firebase" abaixo)
+2. **Copie os arquivos de exemplo**:
+   ```bash
+   cp android/app/google-services.json.example android/app/google-services.json
+   cp lib/core/firebase_options.dart.example lib/core/firebase_options.dart
+   ```
+3. **Substitua os valores** nos arquivos copiados com suas configurações reais do Firebase
+
 ## 🎯 Funcionalidades
 
 ### ✅ **Autenticação e Segurança**
