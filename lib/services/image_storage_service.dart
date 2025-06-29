@@ -38,8 +38,13 @@ class ImageStorageService {
     return extension.isNotEmpty ? extension : '.jpg';
   }
 
-  /// Faz upload da imagem de perfil do usuário e retorna a URL pública
-  Future<String> uploadProfileImage(String userId, File imageFile) async {
+  /// Método privado para upload de imagem com lógica compartilhada
+  Future<String> _uploadImage({
+    required String userId,
+    required File imageFile,
+    required String storagePathPrefix,
+    String? conversationId,
+  }) async {
     Reference? uploadedRef;
     
     try {
@@ -48,11 +53,16 @@ class ImageStorageService {
       
       // Determina a extensão dinamicamente
       final extension = _getFileExtension(imageFile);
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      
+      // Gera nome do arquivo baseado no tipo de upload
+      final fileName = conversationId != null 
+          ? '${conversationId}_$timestamp$extension'
+          : '$timestamp$extension';
       
       final ref = _storage
           .ref()
-          .child('profile_images/$userId/$fileName');
+          .child('$storagePathPrefix/$userId/$fileName');
       
       uploadedRef = ref;
       
@@ -98,63 +108,23 @@ class ImageStorageService {
     }
   }
 
+  /// Faz upload da imagem de perfil do usuário e retorna a URL pública
+  Future<String> uploadProfileImage(String userId, File imageFile) async {
+    return await _uploadImage(
+      userId: userId,
+      imageFile: imageFile,
+      storagePathPrefix: 'profile_images',
+    );
+  }
+
   /// Faz upload da imagem de uma conversa e retorna a URL pública
   Future<String> uploadConversationImage(String userId, String conversationId, File imageFile) async {
-    Reference? uploadedRef;
-    
-    try {
-      // Valida o arquivo antes do upload
-      _validateImageFile(imageFile);
-      
-      // Determina a extensão dinamicamente
-      final extension = _getFileExtension(imageFile);
-      final fileName = '${conversationId}_${DateTime.now().millisecondsSinceEpoch}$extension';
-      
-      final ref = _storage
-          .ref()
-          .child('conversation_images/$userId/$fileName');
-      
-      uploadedRef = ref;
-      
-      final uploadTask = ref.putFile(imageFile);
-      final snapshot = await uploadTask.whenComplete(() {});
-      
-      return await snapshot.ref.getDownloadURL();
-    } on FirebaseException catch (e) {
-      // Limpa arquivo parcial em caso de erro
-      if (uploadedRef != null) {
-        try {
-          await uploadedRef.delete();
-        } catch (deleteError) {
-          print('Erro ao limpar arquivo parcial: $deleteError');
-        }
-      }
-      
-      switch (e.code) {
-        case 'unauthorized':
-          throw Exception('Sem permissão para fazer upload. Verifique sua autenticação.');
-        case 'storage/object-not-found':
-          throw Exception('Arquivo não encontrado no servidor.');
-        case 'storage/quota-exceeded':
-          throw Exception('Limite de armazenamento excedido.');
-        default:
-          throw Exception('Erro no upload: ${e.message}');
-      }
-    } catch (e) {
-      // Limpa arquivo parcial em caso de erro
-      if (uploadedRef != null) {
-        try {
-          await uploadedRef.delete();
-        } catch (deleteError) {
-          print('Erro ao limpar arquivo parcial: $deleteError');
-        }
-      }
-      
-      if (e is Exception) {
-        rethrow;
-      }
-      throw Exception('Erro inesperado no upload: $e');
-    }
+    return await _uploadImage(
+      userId: userId,
+      imageFile: imageFile,
+      storagePathPrefix: 'conversation_images',
+      conversationId: conversationId,
+    );
   }
 
   /// Remove uma imagem do Storage
