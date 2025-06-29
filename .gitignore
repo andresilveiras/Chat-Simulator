@@ -48,3 +48,12 @@ app.*.map.json
 **/google-services.json
 **/GoogleService-Info.plist
 **/firebase_options.dart
+
+# Android local properties (contains system-specific paths)
+**/local.properties
+
+# Java error logs (may contain system information)
+hs_err_pid*.log
+
+# Debug logs
+pglite-debug.log
