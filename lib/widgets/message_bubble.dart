@@ -24,6 +24,33 @@ class MessageBubble extends StatelessWidget {
     this.displayName,
   });
 
+  /// Helper method para criar ImageProvider baseado no tipo de URL
+  ImageProvider? _getImageProvider(String url) {
+    try {
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        // URL de rede (Firebase Storage, etc.)
+        return NetworkImage(url);
+      } else if (url.startsWith('file://')) {
+        // URL de arquivo local com protocolo
+        final filePath = Uri.parse(url).toFilePath();
+        final file = File(filePath);
+        if (file.existsSync()) {
+          return FileImage(file);
+        }
+      } else {
+        // Caminho de arquivo local direto
+        final file = File(url);
+        if (file.existsSync()) {
+          return FileImage(file);
+        }
+      }
+    } catch (e) {
+      // Log do erro para debug, mas não quebra o app
+      print('Erro ao carregar imagem: $e');
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -58,9 +85,20 @@ class MessageBubble extends StatelessWidget {
                 if (imageUrl != null && imageUrl!.isNotEmpty)
                   CircleAvatar(
                     radius: 10,
-                    backgroundImage: imageUrl!.startsWith('http')
-                        ? NetworkImage(imageUrl!)
-                        : FileImage(File(imageUrl!.replaceFirst('file://', ''))) as ImageProvider,
+                    backgroundImage: _getImageProvider(imageUrl!),
+                    onBackgroundImageError: (exception, stackTrace) {
+                      // Log do erro para debug
+                      print('Erro ao carregar imagem de perfil: $exception');
+                    },
+                    child: _getImageProvider(imageUrl!) == null
+                        ? CustomIcon(
+                            emoji: isFromCurrentUser ? '🧑‍💻' : '🧑‍💻',
+                            size: 16,
+                            color: isFromCurrentUser
+                                ? Colors.white
+                                : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
+                          )
+                        : null,
                   )
                 else
                   CustomIcon(
