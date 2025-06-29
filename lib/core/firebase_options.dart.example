@@ -34,52 +34,52 @@ class DefaultFirebaseOptions {
 
   // Configurações para Web
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
-    appId: '1:435765898359:web:22e48cf5901c3e114aea72',
-    messagingSenderId: '435765898359',
-    projectId: 'chat-simulator-app',
-    authDomain: 'chat-simulator-app.firebaseapp.com',
-    storageBucket: 'chat-simulator-app.firebasestorage.app',
+    apiKey: 'YOUR_WEB_API_KEY',
+    appId: 'YOUR_WEB_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
   );
 
   // Configurações para Android
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
-    appId: '1:435765898359:android:22e48cf5901c3e114aea72',
-    messagingSenderId: '435765898359',
-    projectId: 'chat-simulator-app',
-    storageBucket: 'chat-simulator-app.firebasestorage.app',
+    apiKey: 'YOUR_ANDROID_API_KEY',
+    appId: 'YOUR_ANDROID_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
   );
 
   // Configurações para iOS
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
-    appId: '1:435765898359:ios:22e48cf5901c3e114aea72',
-    messagingSenderId: '435765898359',
-    projectId: 'chat-simulator-app',
-    storageBucket: 'chat-simulator-app.firebasestorage.app',
-    iosClientId: '435765898359-44kv88kh3is0nqi8gohmhgmh42t9fi7p.apps.googleusercontent.com',
+    apiKey: 'YOUR_IOS_API_KEY',
+    appId: 'YOUR_IOS_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
+    iosClientId: 'YOUR_IOS_CLIENT_ID',
     iosBundleId: 'com.andresilveiras.chatsimulator',
   );
 
   // Configurações para macOS
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
-    appId: '1:435765898359:ios:22e48cf5901c3e114aea72',
-    messagingSenderId: '435765898359',
-    projectId: 'chat-simulator-app',
-    storageBucket: 'chat-simulator-app.firebasestorage.app',
-    iosClientId: '435765898359-44kv88kh3is0nqi8gohmhgmh42t9fi7p.apps.googleusercontent.com',
+    apiKey: 'YOUR_MACOS_API_KEY',
+    appId: 'YOUR_MACOS_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
+    iosClientId: 'YOUR_MACOS_CLIENT_ID',
     iosBundleId: 'com.andresilveiras.chatsimulator',
   );
 
   // Configurações para Windows
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyBsCWZa-j9o921FAXK-1CotHctDcY9Zr10',
-    appId: '1:435765898359:web:22e48cf5901c3e114aea72',
-    messagingSenderId: '435765898359',
-    projectId: 'chat-simulator-app',
-    authDomain: 'chat-simulator-app.firebaseapp.com',
-    storageBucket: 'chat-simulator-app.firebasestorage.app',
+    apiKey: 'YOUR_WINDOWS_API_KEY',
+    appId: 'YOUR_WINDOWS_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
   );
-}
+} 
