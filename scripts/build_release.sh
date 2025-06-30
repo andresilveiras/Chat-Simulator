@@ -28,8 +28,26 @@ if [[ ! -f "pubspec.yaml" ]]; then
     error_handler "pubspec.yaml não encontrado. Execute este script na raiz do projeto Flutter" $LINENO
 fi
 
-# Versão do app
-VERSION="1.0.0"
+# Extrair versão dinamicamente do pubspec.yaml
+echo "📋 Extraindo versão do pubspec.yaml..."
+VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
+if [[ -z "$VERSION" ]]; then
+    error_handler "Não foi possível extrair a versão do pubspec.yaml" $LINENO
+fi
+
+echo "📦 Versão detectada: $VERSION"
+
+# Verificar se existe uma tag Git correspondente (opcional)
+if git rev-parse --verify "v$VERSION" &> /dev/null; then
+    echo "🏷️  Tag Git v$VERSION encontrada"
+elif git rev-parse --verify "$VERSION" &> /dev/null; then
+    echo "🏷️  Tag Git $VERSION encontrada"
+else
+    echo "⚠️  Nenhuma tag Git encontrada para a versão $VERSION"
+    echo "💡 Considere criar uma tag: git tag v$VERSION"
+fi
+
+# Versão do app (agora extraída dinamicamente)
 RELEASE_DIR="release/v${VERSION}"
 
 # Criar pasta de release
@@ -77,6 +95,7 @@ fi
 
 echo "✅ Builds gerados com sucesso!"
 echo "📁 Arquivos em: $RELEASE_DIR"
+echo "🏷️  Versão: $VERSION"
 echo ""
 echo "📋 Arquivos gerados:"
 ls -la "$RELEASE_DIR" 
