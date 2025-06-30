@@ -77,3 +77,10 @@ ios/Flutter/Flutter.podspec
 
 # Release files (allow these to be committed)
 !release/
+
+# Exclude iOS frameworks and build artifacts from release folder
+release/**/Frameworks/
+release/**/*.app/Frameworks/
+release/**/Flutter.framework/
+release/**/Pods/
+release/**/build/
