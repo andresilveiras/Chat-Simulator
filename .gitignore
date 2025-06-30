@@ -57,3 +57,20 @@ hs_err_pid*.log
 
 # Debug logs
 pglite-debug.log
+
+# iOS build files
+ios/build/
+ios/Pods/
+
+# CocoaPods
+ios/Podfile.lock
+
+# Xcode
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Generated files
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Flutter.podspec

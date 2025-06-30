@@ -45,5 +45,26 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- Permissões para câmera e galeria -->
+	<key>NSCameraUsageDescription</key>
+	<string>Este app precisa acessar a câmera para tirar fotos para o chat.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Este app precisa acessar a galeria de fotos para selecionar imagens para o chat.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Este app precisa salvar imagens na galeria de fotos.</string>
+	
+	<!-- Configurações para Google Sign-In -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>REVERSED_CLIENT_ID</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.435765898359-qulfoneufgarhgd1r1ma2s398poqqmnb</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
