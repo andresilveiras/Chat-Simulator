@@ -48,3 +48,39 @@ app.*.map.json
 **/google-services.json
 **/GoogleService-Info.plist
 **/firebase_options.dart
+
+# Android local properties (contains system-specific paths)
+**/local.properties
+
+# Java error logs (may contain system information)
+hs_err_pid*.log
+
+# Debug logs
+pglite-debug.log
+
+# iOS build files
+ios/build/
+ios/Pods/
+
+# CocoaPods
+ios/Podfile.lock
+
+# Xcode
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Generated files
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Flutter.podspec
+
+# Release files (allow these to be committed)
+!release/
+
+# Exclude iOS frameworks and build artifacts from release folder
+release/**/Frameworks/
+release/**/*.app/Frameworks/
+release/**/Flutter.framework/
+release/**/Pods/
+release/**/build/
